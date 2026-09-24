@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080808">
+    <title>D’ Bronx Barber Studio | Agendamento</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background:
+                radial-gradient(circle at top, #252525 0%, #0b0b0b 38%, #050505 100%);
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 520px;
+            margin: auto;
+            padding: 25px 18px 45px;
+        }
+        .logo {
+            text-align: center;
+            margin: 10px 0 28px;
+        }
+        .logo-icon {
+            width: 65px;
+            height: 65px;
+            border: 1px solid #555;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-family: Georgia, serif;
+            font-size: 22px;
+            letter-spacing: 2px;
+        }
+        .logo h1 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .logo p {
+            margin-top: 8px;
+            color: #aaa;
+            font-size: 10px;
+            letter-spacing: 5px;
+        }
+        .tagline {
+            margin-top: 15px;
+            color: #777;
+            font-size: 12px;
+        }
+        .card {
+            background: rgba(20,20,20,0.95);
+            border: 1px solid #292929;
+            border-radius: 20px;
+            padding: 23px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.55);
+        }
+        .card-title {
+            font-family: Georgia, serif;
+            font-size: 24px;
+            margin-bottom: 7px;
+        }
+        .card-subtitle {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+        .section {
+            margin-top: 22px;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 11px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .number {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #555;
+            border-radius: 50%;
+            color: #aaa;
+            font-size: 10px;
+        }
+        .servicos {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .servico {
+            position: relative;
+            width: 100%;
+            padding: 15px;
+            background: #0d0d0d;
+            border: 1px solid #303030;
+            border-radius: 12px;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .servico:hover {
+            border-color: #777;
+        }
+        .servico.selecionado {
+            border-color: #fff;
+            background: #1d1d1d;
+        }
+        .servico-nome {
+            font-size: 14px;
+            font-weight: bold;
+            padding-right: 80px;
+        }
+        .servico-info {
+            margin-top: 5px;
+            color: #777;
+            font-size: 11px;
+        }
+        .preco {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 12px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #0b0b0b;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+        }
+        input:focus {
+            border-color: #aaa;
+        }
+        .horarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+        }
+        .horario {
+            padding: 13px 5px;
+            background: #0b0b0b;
+            border: 1px solid #333;
+            border-radius: 9px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .horario:hover {
+            border-color: #888;
+        }
+        .horario.selecionado {
+            background: white;
+            color: black;
+            border-color: white;
+            font-weight: bold;
+        }
+        .intervalo {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 8px;
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+        .resumo {
+            display: none;
+            margin-top: 25px;
+            padding: 18px;
+            background: #0c0c0c;
+            border: 1px solid #333;
+            border-radius: 12px;
+        }
+        .resumo h3 {
+            font-family: Georgia, serif;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #222;
+            font-size: 12px;
+        }
+        .linha:last-child {
+            border-bottom: none;
+        }
+        .linha span {
+            color: #777;
+        }
+        .botao {
+            width: 100%;
+            margin-top: 25px;
+            padding: 17px;
+            border: none;
+            border-radius: 11px;
+            background: white;
+            color: black;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .botao:hover {
+            transform: translateY(-2px);
+            background: #ddd;
+        }
+        .whatsapp {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #777;
+            text-align: center;
+            width: 100%;
+        }
+        .aviso {
+            margin-top: 18px;
+            text-align: center;
+            color: #555;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 380px) {
+            .horarios {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .logo h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <div class="logo-icon">
+            DB
+        </div>
+        <h1>D’ Bronx</h1>
+        <p>BARBER STUDIO</p>
+        <div class="tagline">
+            Seu horário. Seu momento.
+        </div>
+    </div>
+    <div class="card">
+        <h2 class="card-title">
+            Agende seu horário
+        </h2>
+        <p class="card-subtitle">
+            Escolha seu serviço, data e horário.
+        </p>
+        <!-- SERVIÇOS -->
+        <div class="section">
+            <div class="section-title">
+                <span class="number">1</span>
+                Escolha o serviço
+            </div>
+            <div class="servicos">
+                <button class="servico"
+                    onclick="selecionarServico(this, 'Corte', 40, 30)">
+                    <div class="servico-nome">Corte</div>
+                    <div class="servico-info">30 minutos</div>
+                    <div class="preco">R$ 40</div>
+                </button>
+                <button class="servico"
+                    onclick="selecionarServico(this, 'Barba', 40, 30)">
+                    <div class="servico-nome">Barba</div>
+                    <div class="servico-info">30 minutos</div>
+                    <div class="preco">R$ 40</div>
+                </button>
+                <button class="servico"
+                    onclick="selecionarServico(this, 'Sobrancelha', 25, 20)">
+                    <div class="servico-nome">Sobrancelha</div>
+                    <div class="servico-info">20 minutos</div>
+                    <div class="preco">R$ 25</div>
+                </button>
+                <button class="servico"
+                    onclick="selecionarServico(this, 'Acabamento (Pezinho)', 25, 20)">
+                    <div class="servico-nome">Acabamento (Pezinho)</div>
+                    <div class="servico-info">20 minutos</div>
+                    <div class="preco">R$ 25</div>
+                </button>
+                <button class="servico"
+                    onclick="selecionarServico(this, 'Limpeza de pele', 30, 30)">
+                    <div class="servico-nome">Limpeza de pele</div>
+                    <div class="servico-info">30 minutos</div>
+                    <div class="preco">R$ 30</div>
+                </button>
+            </div>
+        </div>
+        <!-- DATA -->
+        <div class="section">
+            <div class="section-title">
+                <span class="number">2</span>
+                Escolha a data
+            </div>
+            <label for="data">
+                Atendimento de terça a sábado
+            </label>
+            <input type="date" id="data">
+        </div>
+        <!-- HORÁRIO -->
+        <div class="section">
+            <div class="section-title">
+                <span class="number">3</span>
+                Escolha o horário
+            </div>
+            <div id="horarios" class="horarios">
+                <p style="
+                    color:#666;
+                    font-size:12px;
+                    grid-column:1/-1;
+                    text-align:center;
+                ">
+                    Escolha uma data para visualizar os horários.
+                </p>
+            </div>
+        </div>
+        <!-- NOME -->
+        <div class="section">
+            <div class="section-title">
+                <span class="number">4</span>
+                Seus dados
+            </div>
+            <label for="nome">
+                Nome
+            </label>
+            <input
+                type="text"
+                id="nome"
+                placeholder="Digite seu nome"
+            >
+        </div>
+        <!-- RESUMO -->
+        <div id="resumo" class="resumo">
+            <h3>
+                Seu agendamento
+            </h3>
+            <div class="linha">
+                <span>Serviço</span>
+                <strong id="resumoServico">-</strong>
+            </div>
+            <div class="linha">
+                <span>Data</span>
+                <strong id="resumoData">-</strong>
+            </div>
+            <div class="linha">
+                <span>Horário</span>
+                <strong id="resumoHorario">-</strong>
+            </div>
+            <div class="linha">
+                <span>Valor</span>
+                <strong id="resumoPreco">-</strong>
+            </div>
+        </div>
+        <!-- BOTÃO -->
+        <button class="botao" onclick="agendar()">
+            CONFIRMAR PELO WHATSAPP
+        </button>
+        <div class="whatsapp">
+            Você será direcionado para o WhatsApp.
+        </div>
+        <div class="aviso">
+            Horário de funcionamento:<br>
+            Terça a sábado<br>
+            09:00 às 15:00 • 16:00 às 20:00
+        </div>
+    </div>
+    <div class="footer">
+        D’ BRONX BARBER STUDIO
+    </div>
+</div>
+<script>
+    let servicoSelecionado = "";
+    let precoSelecionado = 0;
+    let duracaoSelecionada = 0;
+    let horarioSelecionado = "";
+    /*
+    =========================================
+    SEU WHATSAPP
+    =========================================
+    */
+    const telefoneWhatsApp = "5541988285582";
+    /*
+    =========================================
+    SELECIONAR SERVIÇO
+    =========================================
+    */
+    function selecionarServico(
+        botao,
+        nome,
+        preco,
+        duracao
+    ) {
+        document
+            .querySelectorAll(".servico")
+            .forEach(function(item) {
+                item.classList.remove("selecionado");
+            });
+        botao.classList.add("selecionado");
+        servicoSelecionado = nome;
+        precoSelecionado = preco;
+        duracaoSelecionada = duracao;
+        atualizarResumo();
+    }
+    /*
+    =========================================
+    DATA MÍNIMA
+    =========================================
+    */
+    const campoData =
+        document.getElementById("data");
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes =
+        String(hoje.getMonth() + 1)
+        .padStart(2, "0");
+    const dia =
+        String(hoje.getDate())
+        .padStart(2, "0");
+    campoData.min =
+        `${ano}-${mes}-${dia}`;
+    /*
+    =========================================
+    QUANDO ESCOLHER A DATA
+    =========================================
+    */
+    campoData.addEventListener(
+        "change",
+        function() {
+            horarioSelecionado = "";
+            mostrarHorarios();
+            atualizarResumo();
+        }
+    );
+    /*
+    =========================================
+    HORÁRIOS
+    =========================================
+    */
+    function mostrarHorarios() {
+        const area =
+            document.getElementById("horarios");
+        area.innerHTML = "";
+        if (!campoData.value) {
+            area.innerHTML = `
+                <p style="
+                    color:#666;
+                    font-size:12px;
+                    grid-column:1/-1;
+                    text-align:center;
+                ">
+                    Escolha uma data para visualizar os horários.
+                </p>
+            `;
+            return;
+        }
+        const data =
+            new Date(
+                campoData.value + "T12:00:00"
+            );
+        const diaSemana =
+            data.getDay();
+        /*
+        Domingo = 0
+        Segunda = 1
+        Terça = 2
+        Quarta = 3
+        Quinta = 4
+        Sexta = 5
+        Sábado = 6
+        */
+        if (
+            diaSemana === 0 ||
+            diaSemana === 1
+        ) {
+            area.innerHTML = `
+                <p style="
+                    color:#888;
+                    font-size:12px;
+                    grid-column:1/-1;
+                    text-align:center;
+                    line-height:1.6;
+                ">
+                    A barbearia não atende neste dia.<br>
+                    Escolha de terça a sábado.
+                </p>
+            `;
+            return;
+        }
+        /*
+        HORÁRIOS DE ATENDIMENTO
+        */
+        const horarios = [
+            "09:00",
+            "10:00",
+            "11:00",
+            "12:00",
+            "13:00",
+            "14:00",
+            "16:00",
+            "17:00",
+            "18:00",
+            "19:00"
+        ];
+        horarios.forEach(function(horario) {
+            const botao =
+                document.createElement("button");
+            botao.className = "horario";
+            botao.innerText = horario;
+            botao.type = "button";
+            botao.onclick = function() {
+                document
+                    .querySelectorAll(".horario")
+                    .forEach(function(item) {
+                        item.classList.remove(
+                            "selecionado"
+                        );
+                    });
+                botao.classList.add(
+                    "selecionado"
+                );
+                horarioSelecionado =
+                    horario;
+                atualizarResumo();
+            };
+            area.appendChild(botao);
+        });
+        /*
+        INTERVALO
+        */
+        const intervalo =
+            document.createElement("div");
+        intervalo.className =
+            "intervalo";
+        intervalo.innerText =
+            "INTERVALO • 15:00 ÀS 16:00";
+        area.insertBefore(
+            intervalo,
+            area.children[6]
+        );
+    }
+    /*
+    =========================================
+    RESUMO
+    =========================================
+    */
+    function atualizarResumo() {
+        const resumo =
+            document.getElementById("resumo");
+        if (
+            !servicoSelecionado &&
+            !campoData.value &&
+            !horarioSelecionado
+        ) {
+            resumo.style.display =
+                "none";
+            return;
+        }
+        resumo.style.display =
+            "block";
+        document.getElementById(
+            "resumoServico"
+        ).innerText =
+            servicoSelecionado || "-";
+        document.getElementById(
+            "resumoHorario"
+        ).innerText =
+            horarioSelecionado || "-";
+        document.getElementById(
+            "resumoPreco"
+        ).innerText =
+            precoSelecionado
+                ? "R$ " + precoSelecionado
+                : "-";
+        if (campoData.value) {
+            const partes =
+                campoData.value.split("-");
+            document.getElementById(
+                "resumoData"
+            ).innerText =
+                partes[2] +
+                "/" +
+                partes[1] +
+                "/" +
+                partes[0];
+        }
+    }
+    /*
+    =========================================
+    AGENDAMENTO
+    =========================================
+    */
+    function agendar() {
+        const nome =
+            document
+                .getElementById("nome")
+                .value
+                .trim();
+        if (!servicoSelecionado) {
+            alert(
+                "Selecione um serviço."
+            );
+            return;
+        }
+        if (!campoData.value) {
+            alert(
+                "Escolha uma data."
+            );
+            return;
+        }
+        if (!horarioSelecionado) {
+            alert(
+                "Escolha um horário."
+            );
+            return;
+        }
+        if (!nome) {
+            alert(
+                "Digite seu nome."
+            );
+            return;
+        }
+        const partes =
+            campoData.value.split("-");
+        const dataFormatada =
+            partes[2] +
+            "/" +
+            partes[1] +
+            "/" +
+            partes[0];
+        /*
+        MENSAGEM QUE SERÁ ENVIADA
+        */
+        const mensagem =
+`Olá! Gostaria de agendar um horário.
+D’ BRONX BARBER STUDIO
+Nome: ${nome}
+Serviço: ${servicoSelecionado}
+Duração: ${duracaoSelecionada} minutos
+Data: ${dataFormatada}
+Horário: ${horarioSelecionado}
+Valor: R$ ${precoSelecionado}`;
+        /*
+        CODIFICAR MENSAGEM
+        */
+        const mensagemCodificada =
+            encodeURIComponent(mensagem);
+        /*
+        LINK DO WHATSAPP
+        */
+        const url =
+            "https://wa.me/" +
+            telefoneWhatsApp +
+            "?text=" +
+            mensagemCodificada;
+        /*
+        ABRIR WHATSAPP
+        */
+        window.location.href = url;
+    }
+</script>
+</body>
+</html>
