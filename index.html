@@ -176,6 +176,14 @@
             border-color: white;
             font-weight: bold;
         }
+        .horario.ocupado {
+            background: #200000;
+            color: #ff5555;
+            border-color: #551111;
+            cursor: not-allowed;
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
         .intervalo {
             grid-column: 1 / -1;
             text-align: center;
@@ -228,6 +236,12 @@
             transform: translateY(-2px);
             background: #ddd;
         }
+        .botao:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
         .whatsapp {
             display: inline-block;
             margin-top: 8px;
@@ -259,11 +273,13 @@
             }
         }
     </style>
+    <!-- SDK do Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="container">
     <div class="logo">
-        <img src="IMG_1609.png" alt="D’ Bronx Barber Studio" class="logo-icon">
+        <img src="perfil.png" alt="D’ Bronx Barber Studio" class="logo-icon">
         <h1>D’ Bronx</h1>
         <p>BARBER STUDIO</p>
         <div class="tagline">Seu horário. Seu momento.</div>
@@ -358,7 +374,7 @@
         </div>
 
         <!-- BOTÃO -->
-        <button type="button" class="botao" onclick="agendar()">
+        <button type="button" id="btn-agendar" class="botao" onclick="agendar()">
             CONFIRMAR PELO WHATSAPP
         </button>
         <div class="whatsapp">Você será direcionado para o WhatsApp.</div>
@@ -372,6 +388,14 @@
 </div>
 
 <script>
+    // ----------------------------------------------------
+    // CONFIGURAÇÃO DO SUPABASE
+    // ----------------------------------------------------
+    const SUPABASE_URL = "https://qptwzytdcfvdeknjoau.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_default"; 
+    
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let servicoSelecionado = "";
     let precoSelecionado = 0;
     let duracaoSelecionada = 0;
@@ -402,7 +426,7 @@
         atualizarResumo();
     });
 
-    function mostrarHorarios() {
+    async function mostrarHorarios() {
         const area = document.getElementById("horarios");
         area.innerHTML = "";
 
@@ -419,11 +443,27 @@
             return;
         }
 
+        area.innerHTML = `<p style="color:#666; font-size:12px; grid-column:1/-1; text-align:center;">Buscando horários...</p>`;
+
+        // Consulta os agendamentos no banco
+        const { data: agendamentosExistentes, error } = await supabaseClient
+            .from('appointments')
+            .select('time')
+            .eq('date', campoData.value);
+
+        if (error) {
+            console.error("Erro ao carregar horários:", error);
+        }
+
+        const horariosOcupados = agendamentosExistentes ? agendamentosExistentes.map(a => a.time) : [];
+
+        area.innerHTML = "";
+
         const horariosManha = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
         const horariosTarde = ["16:00", "17:00", "18:00", "19:00"];
 
         // Renderiza horários da manhã
-        horariosManha.forEach(horario => area.appendChild(criarBotaoHorario(horario)));
+        horariosManha.forEach(horario => area.appendChild(criarBotaoHorario(horario, horariosOcupados.includes(horario))));
 
         // Renderiza faixa de intervalo
         const intervalo = document.createElement("div");
@@ -432,20 +472,27 @@
         area.appendChild(intervalo);
 
         // Renderiza horários da tarde
-        horariosTarde.forEach(horario => area.appendChild(criarBotaoHorario(horario)));
+        horariosTarde.forEach(horario => area.appendChild(criarBotaoHorario(horario, horariosOcupados.includes(horario))));
     }
 
-    function criarBotaoHorario(horario) {
+    function criarBotaoHorario(horario, estaOcupado) {
         const botao = document.createElement("button");
         botao.className = "horario";
         botao.innerText = horario;
         botao.type = "button";
-        botao.onclick = function() {
-            document.querySelectorAll(".horario").forEach(item => item.classList.remove("selecionado"));
-            botao.classList.add("selecionado");
-            horarioSelecionado = horario;
-            atualizarResumo();
-        };
+
+        if (estaOcupado) {
+            botao.classList.add("ocupado");
+            botao.disabled = true;
+            botao.title = "Horário já reservado";
+        } else {
+            botao.onclick = function() {
+                document.querySelectorAll(".horario").forEach(item => item.classList.remove("selecionado"));
+                botao.classList.add("selecionado");
+                horarioSelecionado = horario;
+                atualizarResumo();
+            };
+        }
         return botao;
     }
 
@@ -469,8 +516,19 @@
         }
     }
 
-    function agendar() {
+    // Atualização em tempo real caso outro cliente faça um agendamento
+    supabaseClient
+        .channel('public:appointments')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, payload => {
+            if (payload.new.date === campoData.value) {
+                mostrarHorarios();
+            }
+        })
+        .subscribe();
+
+    async function agendar() {
         const nome = document.getElementById("nome").value.trim();
+        const btnAgendar = document.getElementById("btn-agendar");
 
         if (!servicoSelecionado) {
             alert("Selecione um serviço.");
@@ -489,6 +547,27 @@
             return;
         }
 
+        btnAgendar.disabled = true;
+        btnAgendar.innerText = "AGENDANDO...";
+
+        // Grava no banco de dados do Supabase
+        const { error } = await supabaseClient
+            .from('appointments')
+            .insert([{
+                name: nome,
+                service: servicoSelecionado,
+                date: campoData.value,
+                time: horarioSelecionado
+            }]);
+
+        if (error) {
+            alert("Este horário acabou de ser reservado por outra pessoa. Escolha outro horário.");
+            btnAgendar.disabled = false;
+            btnAgendar.innerText = "CONFIRMAR PELO WHATSAPP";
+            mostrarHorarios();
+            return;
+        }
+
         const partes = campoData.value.split("-");
         const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
@@ -496,6 +575,10 @@
 
         const url = `https://wa.me/${telefoneWhatsApp}?text=${encodeURIComponent(mensagem)}`;
         window.open(url, "_blank");
+
+        btnAgendar.disabled = false;
+        btnAgendar.innerText = "CONFIRMAR PELO WHATSAPP";
+        mostrarHorarios();
     }
 </script>
 </body>
