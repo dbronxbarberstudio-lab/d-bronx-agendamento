@@ -451,11 +451,12 @@
             .select('time')
             .eq('date', campoData.value);
 
+        let horariosOcupados = [];
         if (error) {
-            console.error("Erro ao carregar horários:", error);
+            console.error("Erro ao carregar horários do Supabase:", error);
+        } else if (agendamentosExistentes) {
+            horariosOcupados = agendamentosExistentes.map(a => a.time);
         }
-
-        const horariosOcupados = agendamentosExistentes ? agendamentosExistentes.map(a => a.time) : [];
 
         area.innerHTML = "";
 
